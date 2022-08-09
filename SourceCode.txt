@@ -1,0 +1,197 @@
+import queue                                         
+from queue import Queue
+from collections import deque
+import networkx as nx
+
+//getting input data(array to use or maiza to use to find the path that automated car can take in pothole road
+def createMaze():                                                          
+   file = open('given', 'r')
+   newList = []
+   j = 0
+   f= file.readlines() 
+   for line in f:
+     if line[-1]=="\n":
+       newList.append(list(line[:-1]))
+     else:
+        newList.append(list(line))
+   return newList
+
+given_1 = createMaze()
+
+//iterate throught the queue to find the path from given starting node and gaol node
+def valid(maze, moves):                                 
+    for x, pos in enumerate(maze[0]):
+        if pos == "S":
+            start = x
+    i = start
+    j = 0
+    for move in moves:
+        if move == "L":
+            i -= 1
+        elif move == "R":
+            i += 1
+        elif move == "U":
+            j -= 1
+        elif move == "D":
+            j += 1
+
+        if not(0 <= i < len(maze[0]) and 0 <= j < len(maze)):
+            return False
+        elif (maze[j][i] == " "):
+            return False
+    return True
+
+def findEnd(maze, moves):                                  
+    for x, pos in enumerate(maze[0]):
+        if pos == "S":
+            start = x
+    i = start
+    j = 0
+    for move in moves:
+        if move == "L":
+            i -= 1
+        elif move == "R":
+            i += 1
+        elif move == "U":
+            j -= 1
+        elif move == "D":
+            j += 1
+
+    if maze[j][i] == "G":
+        print("Found: " + moves)
+        return True
+    return False
+
+//solve the maze using two type of algorithms BFS(Breadth First Search) and DFS(Depth First Search)
+
+graph = nx.DiGraph()
+def solveMaze(maze):
+  numOfRow, numOfColumn = len(maze), len(maze[0])
+
+  start = (0,0)
+  for row in range(numOfRow):
+    for column in range(numOfColumn):
+      if maze[row][column] == 'S':
+        start = (row, column)
+        break
+    else:
+      continue
+    break
+  else:
+    return None
+
+  temp = 0
+  tem = 0
+  queue = deque()
+  path = deque()
+  coordinate = []
+  edges = deque()
+  shortPath = ''
+
+  queue.appendleft((start[0], start[1], 0)) # 0-->distance
+  directions = [[0,1],[0,-1], [1,0], [-1,0]] #right left up down
+  visited = [[False] * numOfColumn for _ in range(numOfRow)]
+
+  while len(queue) != 0:
+    coord = queue.pop() # top coordinate
+    coordinate.append((coord[0], coord[1]))  
+    visited[coord[0]][coord[1]] = True
+    if maze[coord[0]][coord[1]] == "G":
+      for i in path:
+        shortPath += i
+      return(coordinate)
+
+    for dir in directions:
+      nr,nc = coord[0] + dir[0], coord[1] + dir[1]
+      if (nr < 0 or nr >= numOfRow or nc < 0 or nc >= numOfColumn or maze[nr][nc] == " " or visited[nr][nc]):
+        continue
+
+      if temp == nc and tem > nr:
+        path.appendleft("L")
+        temp = nc
+        tem = nr
+      elif temp == nc and tem < nr:
+        path.appendleft("R")
+        temp = nc
+        tem = nr
+      elif temp > nc and tem == nr:
+        path.appendleft("U")
+        temp = nc
+        tem = nr
+      elif temp < nc and tem == nr:
+        path.appendleft("D")
+        temp = nc
+        tem = nr
+        
+      queue.appendleft((nr, nc, coord[2] + 1))
+
+maze = createMaze()
+mama = solveMaze(maze)
+i = 0
+
+def goalReached(node, goal):
+  if node == goal:
+    return True
+  else:
+    return False
+
+def successor(node):
+  global i
+  momo = mama[i]
+  if node == maze[momo[0]][momo[1]]:
+    i += 1
+    momo = mama[i]
+    return(maze[momo[0]][momo[1]])
+
+def Rest(Node):
+  global i
+  momo = mama[i]
+  if Node == maze[momo[0]][momo[1]]:
+    i -= 1
+    momo = mama[i]
+    return(maze[momo[0]][momo[1]])
+
+def First(Node):
+    Node =successor(Node)
+
+def DEPTHFIRSTSEARCH(Node, Goal):                          
+    if goalReached(Node, Goal):
+      return("Solution found")
+    NewNodes =  successor(Node)
+    while NewNodes is not None: 
+      Result = DEPTHFIRSTSEARCH(First(NewNodes), Goal)
+      if Result == "Solution found":
+        return("Solution found")
+      NewNodes = Rest(NewNodes)
+      return("No solution")
+
+DEPTHFIRSTSEARCH(maze[0][0], "G")
+
+def goalReached(node, goal):
+  if node == goal:
+    return True
+  else:
+    return False
+
+def Successors(node):
+  global i
+  momo = mama[i]
+  if node == maze[momo[0]][momo[1]]:
+    i += 1
+    momo = mama[i]
+    return(maze[momo[0]][momo[1]])
+
+
+def BREADTHFIRSTSEARCH(nodeList, goal):
+  newNode = " "
+  for node in nodeList:
+    if goalReached(node, goal):
+      return("Solution found", node)
+    newNode = Successors(node)
+    #print(newNode, goal)
+
+    if newNode is not None:
+      return(BREADTHFIRSTSEARCH(newNode, goal))
+    else:
+        return("No Solution")
+BREADTHFIRSTSEARCH(maze[0][0], "G")
