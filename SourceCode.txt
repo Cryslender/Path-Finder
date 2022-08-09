@@ -1,6 +1,4 @@
 import queue                                         
-from queue import Queue
-from collections import deque
 import networkx as nx
 
 //getting input data(array to use or maiza to use to find the path that automated car can take in pothole road
